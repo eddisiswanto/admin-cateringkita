@@ -9,8 +9,8 @@
               <th>No</th>
               <th>Title</th>
               <th>Price</th>
-              <th>Country</th>
-              <th>City</th>
+              <th>Satuan</th>
+              <th>Min. Order</th>
               <th>Action</th>
             </tr>
           </thead>
@@ -19,9 +19,9 @@
             <tr>
               <td><%= i + 1 %></td>
               <td><%= item[i].title %></td>
-              <td>$ <%= item[i].price %></td>
-              <td><%= item[i].country %></td>
-              <td><%= item[i].city %></td>
+              <td>Rp. <%= item[i].price %></td>
+              <td><%= item[i].unit %></td>
+              <td><%= item[i].min_order %></td>
               <td>
                 <form action="/admin/item/<%= item[i].id %>/delete?_method=DELETE" method="POST">
                   <a href="/admin/item/show-image/<%= item[i].id %>" class="btn btn-info btn-circle btn-sm"><i

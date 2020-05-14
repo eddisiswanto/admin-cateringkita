@@ -31,6 +31,10 @@ const bookingSchema = new mongoose.Schema({
     duration: {
       type: Number,
       required: true
+    },
+    jml_order: {
+      type: Number,
+      required: true
     }
   },
   total: {

@@ -10,7 +10,7 @@ module.exports = {
   landingPage: async (req, res) => {
     try {
       const mostPicked = await Item.find()
-        .select('_id title country city price unit imageId')
+        .select('_id title min_order price unit imageId')
         .limit(5)
         .populate({ path: 'imageId', select: '_id imageUrl' })
 
@@ -19,7 +19,7 @@ module.exports = {
         .limit(3)
         .populate({
           path: 'itemId',
-          select: '_id title country city isPopular  imageId',
+          select: '_id title min_order isPopular imageId',
           perDocumentLimit: 4,
           option: { sort: { sumBooking: -1 } },
           populate: {
@@ -31,7 +31,7 @@ module.exports = {
 
       const treveler = await Treveler.find();
       const treasure = await Treasure.find();
-      const city = await Item.find();
+      const catering = await Item.find();
 
       for (let i = 0; i < category.length; i++) {
         for (let x = 0; x < category[i].itemId.length; x++) {
@@ -57,9 +57,9 @@ module.exports = {
 
       res.status(200).json({
         hero: {
-          travelers: treveler.length,
-          treasures: treasure.length,
-          cities: city.length
+          pelanggan: treveler.length,
+          foto: treasure.length,
+          catering: catering.length
         },
         mostPicked,
         category,
@@ -106,7 +106,7 @@ module.exports = {
     const {
       idItem,
       duration,
-      // price,
+      jml_order,
       bookingStartDate,
       bookingEndDate,
       firstName,
@@ -126,7 +126,7 @@ module.exports = {
     if (
       idItem === undefined ||
       duration === undefined ||
-      // price === undefined ||
+      jml_order === undefined ||
       bookingStartDate === undefined ||
       bookingEndDate === undefined ||
       firstName === undefined ||
@@ -148,7 +148,7 @@ module.exports = {
 
     await item.save();
 
-    let total = item.price * duration;
+    let total = item.price * jml_order * duration;
     let tax = total * 0.10;
 
     const invoice = Math.floor(1000000 + Math.random() * 9000000);
@@ -169,7 +169,8 @@ module.exports = {
         _id: item.id,
         title: item.title,
         price: item.price,
-        duration: duration
+        duration: duration,
+        jml_order: jml_order
       },
 
       memberId: member.id,

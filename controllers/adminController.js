@@ -20,7 +20,7 @@ module.exports = {
       if (req.session.user == null || req.session.user == undefined) {
         res.render('index', {
           alert,
-          title: "Staycation | Login"
+          title: "Catering Kita | Login"
         });
       } else {
         res.redirect('/admin/dashboard');
@@ -69,7 +69,7 @@ module.exports = {
       const booking = await Booking.find();
       const item = await Item.find();
       res.render('admin/dashboard/view_dashboard', {
-        title: "Staycation | Dashboard",
+        title: "Catering Kita | Dashboard",
         user: req.session.user,
         member,
         booking,
@@ -89,7 +89,7 @@ module.exports = {
       res.render('admin/category/view_category', {
         category,
         alert,
-        title: "Staycation | Category",
+        title: "Catering Kita | Category",
         user: req.session.user
       });
     } catch (error) {
@@ -150,7 +150,7 @@ module.exports = {
       const alertStatus = req.flash('alertStatus');
       const alert = { message: alertMessage, status: alertStatus };
       res.render('admin/bank/view_bank', {
-        title: "Staycation | Bank",
+        title: "Catering Kita | Bank",
         alert,
         bank,
         user: req.session.user
@@ -238,7 +238,7 @@ module.exports = {
       const alertStatus = req.flash('alertStatus');
       const alert = { message: alertMessage, status: alertStatus };
       res.render('admin/item/view_item', {
-        title: "Staycation | Item",
+        title: "Catering Kita | Item",
         category,
         alert,
         item,
@@ -254,7 +254,7 @@ module.exports = {
 
   addItem: async (req, res) => {
     try {
-      const { categoryId, title, price, city, about } = req.body;
+      const { categoryId, title, price, min_order, about } = req.body;
       if (req.files.length > 0) {
         const category = await Category.findOne({ _id: categoryId });
         const newItem = {
@@ -262,7 +262,7 @@ module.exports = {
           title,
           description: about,
           price,
-          city
+          min_order
         }
         const item = await Item.create(newItem);
         category.itemId.push({ _id: item._id });
@@ -292,7 +292,7 @@ module.exports = {
       const alertStatus = req.flash('alertStatus');
       const alert = { message: alertMessage, status: alertStatus };
       res.render('admin/item/view_item', {
-        title: "Staycation | Show Image Item",
+        title: "Catering Kita | Show Image Item",
         alert,
         item,
         action: 'show image',
@@ -316,7 +316,7 @@ module.exports = {
       const alertStatus = req.flash('alertStatus');
       const alert = { message: alertMessage, status: alertStatus };
       res.render('admin/item/view_item', {
-        title: "Staycation | Edit Item",
+        title: "Catering Kita | Edit Item",
         alert,
         item,
         category,
@@ -333,7 +333,7 @@ module.exports = {
   editItem: async (req, res) => {
     try {
       const { id } = req.params;
-      const { categoryId, title, price, city, about } = req.body;
+      const { categoryId, title, price, min_order, about } = req.body;
       const item = await Item.findOne({ _id: id })
         .populate({ path: 'imageId', select: 'id imageUrl' })
         .populate({ path: 'categoryId', select: 'id name' });
@@ -347,7 +347,7 @@ module.exports = {
         }
         item.title = title;
         item.price = price;
-        item.city = city;
+        item.min_order = min_order;
         item.description = about;
         item.categoryId = categoryId;
         await item.save();
@@ -357,7 +357,7 @@ module.exports = {
       } else {
         item.title = title;
         item.price = price;
-        item.city = city;
+        item.min_order = min_order;
         item.description = about;
         item.categoryId = categoryId;
         await item.save();
@@ -423,7 +423,7 @@ module.exports = {
     }
   },
   addFeature: async (req, res) => {
-    const { name, qty, itemId } = req.body;
+    const { name, itemId } = req.body;
 
     try {
       if (!req.file) {
@@ -433,7 +433,6 @@ module.exports = {
       }
       const feature = await Feature.create({
         name,
-        qty,
         itemId,
         imageUrl: `images/${req.file.filename}`
       });
@@ -441,7 +440,7 @@ module.exports = {
       const item = await Item.findOne({ _id: itemId });
       item.featureId.push({ _id: feature._id });
       await item.save()
-      req.flash('alertMessage', 'Success Add Feature');
+      req.flash('alertMessage', 'Success Add Menu');
       req.flash('alertStatus', 'success');
       res.redirect(`/admin/item/show-detail-item/${itemId}`);
     } catch (error) {
@@ -452,23 +451,21 @@ module.exports = {
   },
 
   editFeature: async (req, res) => {
-    const { id, name, qty, itemId } = req.body;
+    const { id, name, itemId } = req.body;
     try {
       const feature = await Feature.findOne({ _id: id });
       if (req.file == undefined) {
         feature.name = name;
-        feature.qty = qty;
         await feature.save();
-        req.flash('alertMessage', 'Success Update Feature');
+        req.flash('alertMessage', 'Success Update Menu');
         req.flash('alertStatus', 'success');
         res.redirect(`/admin/item/show-detail-item/${itemId}`);
       } else {
         await fs.unlink(path.join(`public/${feature.imageUrl}`));
         feature.name = name;
-        feature.qty = qty;
         feature.imageUrl = `images/${req.file.filename}`
         await feature.save();
-        req.flash('alertMessage', 'Success Update Feature');
+        req.flash('alertMessage', 'Success Update Menu');
         req.flash('alertStatus', 'success');
         res.redirect(`/admin/item/show-detail-item/${itemId}`);
       }
@@ -493,7 +490,7 @@ module.exports = {
       }
       await fs.unlink(path.join(`public/${feature.imageUrl}`));
       await feature.remove();
-      req.flash('alertMessage', 'Success Delete Feature');
+      req.flash('alertMessage', 'Success Delete Menu');
       req.flash('alertStatus', 'success');
       res.redirect(`/admin/item/show-detail-item/${itemId}`);
     } catch (error) {
@@ -522,7 +519,7 @@ module.exports = {
       const item = await Item.findOne({ _id: itemId });
       item.activityId.push({ _id: activity._id });
       await item.save()
-      req.flash('alertMessage', 'Success Add Activity');
+      req.flash('alertMessage', 'Success Add Service');
       req.flash('alertStatus', 'success');
       res.redirect(`/admin/item/show-detail-item/${itemId}`);
     } catch (error) {
@@ -540,7 +537,7 @@ module.exports = {
         activity.name = name;
         activity.type = type;
         await activity.save();
-        req.flash('alertMessage', 'Success Update activity');
+        req.flash('alertMessage', 'Success Update Service');
         req.flash('alertStatus', 'success');
         res.redirect(`/admin/item/show-detail-item/${itemId}`);
       } else {
@@ -549,7 +546,7 @@ module.exports = {
         activity.type = type;
         activity.imageUrl = `images/${req.file.filename}`
         await activity.save();
-        req.flash('alertMessage', 'Success Update activity');
+        req.flash('alertMessage', 'Success Update Service');
         req.flash('alertStatus', 'success');
         res.redirect(`/admin/item/show-detail-item/${itemId}`);
       }
@@ -574,7 +571,7 @@ module.exports = {
       }
       await fs.unlink(path.join(`public/${activity.imageUrl}`));
       await activity.remove();
-      req.flash('alertMessage', 'Success Delete Activity');
+      req.flash('alertMessage', 'Success Delete Service');
       req.flash('alertStatus', 'success');
       res.redirect(`/admin/item/show-detail-item/${itemId}`);
     } catch (error) {
@@ -591,7 +588,7 @@ module.exports = {
         .populate('bankId');
 
       res.render('admin/booking/view_booking', {
-        title: "Staycation | Booking",
+        title: "Catering Kita | Booking",
         user: req.session.user,
         booking
       });
@@ -612,7 +609,7 @@ module.exports = {
         .populate('bankId');
 
       res.render('admin/booking/show_detail_booking', {
-        title: "Staycation | Detail Booking",
+        title: "Catering Kita | Detail Booking",
         user: req.session.user,
         booking,
         alert

@@ -10,12 +10,12 @@ const itemSchema = new mongoose.Schema({
     type: Number,
     required: true
   },
-  country: {
-    type: String,
-    default: 'Indonesia'
-  },
-  city: {
-    type: String,
+  // country: {
+  //   type: String,
+  //   default: 'Indonesia'
+  // },
+  min_order: {
+    type: Number,
     required: true
   },
   isPopular: {
@@ -28,7 +28,7 @@ const itemSchema = new mongoose.Schema({
   },
   unit: {
     type: String,
-    default: 'night'
+    default: 'porsi'
   },
   sumBooking: {
     type: Number,

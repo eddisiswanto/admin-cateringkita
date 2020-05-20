@@ -1,33 +1,39 @@
-const Item = require('../models/Item');
-const Treasure = require('../models/Activity');
-const Treveler = require('../models/Booking');
-const Category = require('../models/Category');
-const Bank = require('../models/Bank');
-const Booking = require('../models/Booking');
-const Member = require('../models/Member');
+const Item = require("../models/Item");
+const Treasure = require("../models/Activity");
+const Treveler = require("../models/Booking");
+const Category = require("../models/Category");
+const Bank = require("../models/Bank");
+const Booking = require("../models/Booking");
+const Member = require("../models/Member");
+const Testimonial = require("../models/Testimonial");
 
 module.exports = {
   landingPage: async (req, res) => {
     try {
       const mostPicked = await Item.find()
-        .select('_id title min_order price unit imageId')
+        .select("_id title min_order price unit imageId")
         .limit(5)
-        .populate({ path: 'imageId', select: '_id imageUrl' })
+        .populate({ path: "imageId", select: "_id imageUrl" });
 
       const category = await Category.find()
-        .select('_id name')
+        .select("_id name")
         .limit(3)
         .populate({
-          path: 'itemId',
-          select: '_id title min_order isPopular imageId',
+          path: "itemId",
+          select: "_id title min_order isPopular imageId",
           perDocumentLimit: 4,
           option: { sort: { sumBooking: -1 } },
           populate: {
-            path: 'imageId',
-            select: '_id imageUrl',
-            perDocumentLimit: 1
-          }
-        })
+            path: "imageId",
+            select: "_id imageUrl",
+            perDocumentLimit: 1,
+          },
+        });
+
+      const testimonial = await Testimonial.find()
+        .select("_id name pekerjaan content imageUrl rate")
+        .limit(3)
+        .populate({ path: "testimonial", select: "_id name pekerjaan content imageUrl rate" });
 
       const treveler = await Treveler.find();
       const treasure = await Treasure.find();
@@ -45,26 +51,27 @@ module.exports = {
         }
       }
 
-      const testimonial = {
-        _id: "asd1293uasdads1",
-        imageUrl: "images/testimonial2.jpg",
-        name: "Happy Family",
-        rate: 4.55,
-        content: "What a great trip with my family and I should try again next time soon ...",
-        familyName: "Angga",
-        familyOccupation: "Product Designer"
-      }
+      // const testimonial = {
+      //   _id: "asd1293uasdads1",
+      //   imageUrl: "images/testimonial2.jpg",
+      //   name: "Happy Family",
+      //   rate: 4.55,
+      //   content:
+      //     "What a great trip with my family and I should try again next time soon ...",
+      //   familyName: "Angga",
+      //   familyOccupation: "Product Designer",
+      // };
 
       res.status(200).json({
         hero: {
           pelanggan: treveler.length,
           foto: treasure.length,
-          catering: catering.length
+          catering: catering.length,
         },
         mostPicked,
         category,
-        testimonial
-      })
+        testimonial,
+      });
     } catch (error) {
       console.log(error);
       res.status(500).json({ message: "Internal server error" });
@@ -75,28 +82,32 @@ module.exports = {
     try {
       const { id } = req.params;
       const item = await Item.findOne({ _id: id })
-        .populate({ path: 'featureId', select: '_id name qty imageUrl' })
-        .populate({ path: 'activityId', select: '_id name type imageUrl' })
-        .populate({ path: 'imageId', select: '_id imageUrl' });
+        .populate({ path: "featureId", select: "_id name qty imageUrl" })
+        .populate({ path: "activityId", select: "_id name type imageUrl" })
+        .populate({ path: "imageId", select: "_id imageUrl" });
 
       const bank = await Bank.find();
 
-      const testimonial = {
-        _id: "asd1293uasdads1",
-        imageUrl: "images/testimonial1.jpg",
-        name: "Happy Family",
-        rate: 4.55,
-        content: "What a great trip with my family and I should try again next time soon ...",
-        familyName: "Angga",
-        familyOccupation: "Product Designer"
-      }
+      // const testimonial = {
+      //   _id: "asd1293uasdads1",
+      //   imageUrl: "images/testimonial1.jpg",
+      //   name: "Happy Family",
+      //   rate: 4.55,
+      //   content:
+      //     "What a great trip with my family and I should try again next time soon ...",
+      //   familyName: "Angga",
+      //   familyOccupation: "Product Designer",
+      // };
+      const testimonial = await Testimonial.find()
+        .select("_id name pekerjaan content imageUrl rate")
+        .limit(3)
+        .populate({ path: "testimonial", select: "_id name pekerjaan content imageUrl rate" });
 
       res.status(200).json({
         ...item._doc,
         bank,
-        testimonial
-      })
-
+        testimonial,
+      });
     } catch (error) {
       res.status(500).json({ message: "Internal server error" });
     }
@@ -121,7 +132,7 @@ module.exports = {
       return res.status(404).json({ message: "Image not found" });
     }
 
-    console.log(idItem)
+    console.log(idItem);
 
     if (
       idItem === undefined ||
@@ -134,7 +145,8 @@ module.exports = {
       email === undefined ||
       phoneNumber === undefined ||
       accountHolder === undefined ||
-      bankFrom === undefined) {
+      bankFrom === undefined
+    ) {
       res.status(404).json({ message: "Lengkapi semua field" });
     }
 
@@ -149,7 +161,7 @@ module.exports = {
     await item.save();
 
     let total = item.price * jml_order * duration;
-    let tax = total * 0.10;
+    let tax = total * 0.1;
 
     const invoice = Math.floor(1000000 + Math.random() * 9000000);
 
@@ -157,32 +169,32 @@ module.exports = {
       firstName,
       lastName,
       email,
-      phoneNumber
+      phoneNumber,
     });
 
     const newBooking = {
       invoice,
       bookingStartDate,
       bookingEndDate,
-      total: total += tax,
+      total: (total += tax),
       itemId: {
         _id: item.id,
         title: item.title,
         price: item.price,
         duration: duration,
-        jml_order: jml_order
+        jml_order: jml_order,
       },
 
       memberId: member.id,
       payments: {
         proofPayment: `images/${req.file.filename}`,
         bankFrom: bankFrom,
-        accountHolder: accountHolder
-      }
-    }
+        accountHolder: accountHolder,
+      },
+    };
 
     const booking = await Booking.create(newBooking);
 
     res.status(201).json({ message: "Success Booking", booking });
-  }
-}
+  },
+};
